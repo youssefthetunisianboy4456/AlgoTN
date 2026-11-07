@@ -1,0 +1,30 @@
+NOUVEAU_TYPE TAB= TABLEAU de 10 entier
+PROCEDURE SAISIR(@N:entier) 
+DEBUT
+    REPETER 
+        LIRE_ENTIER(N)
+    JUSQU'A 3<=N<=10
+FIN
+
+PROCEDURE REMPLIR(@T:TAB,N:entier) 
+DEBUT
+    POUR i DE 0 à N-1 FAIRE
+        REPETER
+            ECRIRE("T[",i,"]= ")
+            LIRE_ENTIER(T[i])
+        JUSQU'A 10<=T[i] et t[i]<=20
+    FIN POUR
+FIN  
+TDOL
+i :entier 
+
+PROCEDURE AFFICHERDOUBLE(T:TAB,N:entier)
+DEBUT
+    POUR i DE 0 à N-1 FAIRE
+        ECRIRE(2*T[i])
+    FIN POUR 
+FIN
+
+SaiSIR(N)
+REMPLIr(V,N)
+AFFICHERDOUBLE(V,N)

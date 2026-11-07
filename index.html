@@ -1,0 +1,332 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AlgoTN Studio</title>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+
+    h1 { margin: 0; font-size: 22px; }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 9px 16px;
+      background: #334155;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover:not(:disabled) { background: #475569; }
+
+    #run { background: #2563eb; }
+    #run:hover:not(:disabled) { background: #1d4ed8; }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .panel {
+      overflow: hidden;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
+      border-radius: 9px;
+      background: #1e293b;
+    }
+
+    .panel-title {
+      padding: 10px 14px;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      resize: vertical;
+      padding: 16px;
+      border: 0;
+      outline: none;
+      background: #111827;
+      color: #f8fafc;
+      font: 15px/1.6 Consolas, 'Courier New', monospace;
+      tab-size: 4;
+    }
+
+    #code { min-height: 350px; }
+    #output { min-height: 150px; color: #86efac; }
+
+    #status {
+      padding: 0 2px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>AlgoTN Studio</h1>
+
+    <div class="buttons">
+      <button id="open" type="button">Ouvrir</button>
+      <button id="save" type="button">Enregistrer</button>
+      <button id="run" type="button" disabled>▶ Exécuter</button>
+      <button id="clear" type="button">Effacer la sortie</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div class="panel-title">ALGORITHME</div>
+
+      <textarea id="code" spellcheck="false"></textarea>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">CONSOLE</div>
+      <textarea id="output" readonly></textarea>
+    </div>
+
+    <div id="status" role="status" aria-live="polite">
+      Chargement d'AlgoTN...
+    </div>
+  </main>
+
+  <input type="file" id="fileInput" accept=".txt,.algo,.mini" hidden>
+
+  <script>
+    const editor = document.getElementById("code");
+    const output = document.getElementById("output");
+    const status = document.getElementById("status");
+    const runButton = document.getElementById("run");
+    const fileInput = document.getElementById("fileInput");
+
+    let pyodide;
+    let executeAlgo;
+
+    // ---------------- INITIALISATION ----------------
+
+    async function initialize() {
+      try {
+        pyodide = await loadPyodide();
+
+        // Charger les fichiers Python
+        const files = [
+          "errors.py",
+          "lexer.py",
+          "parser.py",
+          "interpreter.py"
+        ];
+
+        for (const filename of files) {
+          status.textContent = "Chargement de " + filename + "...";
+
+          const response = await fetch("./" + filename);
+
+          if (!response.ok) {
+            throw new Error(
+              "Impossible de charger " + filename +
+              " (HTTP " + response.status + ")"
+            );
+          }
+
+          const content = await response.text();
+
+          pyodide.FS.writeFile("/" + filename, content);
+        }
+
+        // Définir l'exécuteur Python
+        pyodide.runPython(String.raw`
+import sys
+import io
+import builtins
+import traceback
+
+from contextlib import redirect_stdout
+from js import window
+
+sys.path.insert(0, "/")
+
+from errors import AlgoTNError
+from lexer import tokenize
+from parser import Parser
+from interpreter import Interpreter
+
+
+def execute_algotn(source):
+    console = io.StringIO()
+    original_input = builtins.input
+
+    def browser_input(message=""):
+        response = window.prompt(
+            str(message) or "Entrez une valeur :"
+        )
+
+        if response is None:
+            raise AlgoTNError("Saisie annulée")
+
+        return str(response)
+
+    try:
+        builtins.input = browser_input
+
+        with redirect_stdout(console):
+            tokens = tokenize(source)
+
+            parser = Parser(tokens)
+            tree = parser.parse()
+
+            interpreter = Interpreter()
+            interpreter.node_lines = parser.node_lines
+
+            interpreter.run(tree)
+
+    except AlgoTNError as error:
+        console.write(f"ERREUR : {error}\n")
+
+    except Exception:
+        console.write("ERREUR INTERNE :\n")
+        traceback.print_exc(file=console)
+
+    finally:
+        builtins.input = original_input
+
+    return console.getvalue()
+        `);
+
+        executeAlgo = pyodide.globals.get("execute_algotn");
+
+        runButton.disabled = false;
+        status.textContent = "AlgoTN prêt !";
+
+      } catch (error) {
+        output.value = "Erreur de chargement : " + error.message;
+        status.textContent = "Échec du chargement";
+        console.error(error);
+      }
+    }
+
+    // ---------------- EXECUTION ----------------
+
+    function runCode() {
+      if (!executeAlgo) return;
+
+      runButton.disabled = true;
+      output.value = "";
+      status.textContent = "Exécution en cours...";
+
+      try {
+        const result = executeAlgo(editor.value);
+
+        output.value = result || "Exécution terminée (aucune sortie).";
+
+        status.textContent = result.startsWith("ERREUR")
+          ? "Erreur"
+          : "Exécution terminée";
+
+      } catch (error) {
+        output.value = "Erreur JavaScript : " + error.message;
+        status.textContent = "Erreur";
+        console.error(error);
+
+      } finally {
+        runButton.disabled = false;
+      }
+    }
+
+    // ---------------- BOUTONS ----------------
+
+    runButton.addEventListener("click", runCode);
+
+    document.getElementById("clear").addEventListener("click", () => {
+      output.value = "";
+    });
+
+    // Ouvrir un programme
+    document.getElementById("open").addEventListener("click", () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+
+      if (file) {
+        editor.value = await file.text();
+      }
+
+      fileInput.value = "";
+    });
+
+    // Enregistrer un programme
+    document.getElementById("save").addEventListener("click", () => {
+      const blob = new Blob(
+        [editor.value],
+        { type: "text/plain;charset=utf-8" }
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "programme.txt";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    });
+
+    // Ctrl + Entrée = Exécuter
+    editor.addEventListener("keydown", event => {
+      if (event.ctrlKey && event.key === "Enter") {
+        event.preventDefault();
+
+        if (!runButton.disabled) {
+          runCode();
+        }
+      }
+    });
+
+    // Démarrer AlgoTN
+    initialize();
+  </script>
+</body>
+</html>
