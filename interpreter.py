@@ -4,9 +4,7 @@ from copy import deepcopy
 from random import randint
 from math import sqrt
 from errors import AlgoTNError
-import get_tabs
 
-print(get_tabs.all_tabs)
 class Interpreter:
     def __init__(self):
         self.variables = {}
