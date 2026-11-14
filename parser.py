@@ -51,7 +51,7 @@ class Parser:
                         params = []
                         if self.first_token()[0] != "RPAR":
                             while True:
-                                if str(self.first_token()[1]).upper()!="END" :
+                                if (self.first_token())!=["KEYWORD","end"] :
                                     params.append(self.logic())
                                     if self.first_token()[0] != "COMMA":
                                         break
