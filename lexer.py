@@ -58,9 +58,7 @@ def tokenize(code) :
                 "DÉBUT":"start",
                 "RÉPÉTER":"repeat",
                 "RÉPETER":"repeat",
-                "REPÉTER":"repeat",
-                "TDOL":"tdol",
-                "TDOG":"tdog"
+                "REPÉTER":"repeat"
             }
             logicops={
                 "ET" : "and",

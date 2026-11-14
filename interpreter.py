@@ -4,21 +4,82 @@ from copy import deepcopy
 from random import randint
 from math import sqrt
 from errors import AlgoTNError
+import get_tabs
+#print(get_tabs.all_tabs)
 
 class Interpreter:
     def __init__(self):
+        self.initialvars={}
+        self.initialtabs={}
+        self.initialfuncs={}
+        self.initialprocedures={}
         self.variables = {}
         self.functions={}
         self.procedures={}
         self.tabs={}
         self.types={}
         self.node_lines = {}
+        self.cc="----------SUPERSUPERSPECIALNOWHEREITHASENDED"
+    def construct(self,tdos) : #"TDOL de x"
+        tdog={}
+        tdols={}
+        for part in tdos :
+            if part["name"]=="TDOG" :
+                tdog=part["data"]
+            elif part["name"]=="TDNT" :
+                tdnt=part["data"]
+            elif part["name"].startswith("TDOL de ") :
+                tdols[part["name"][8:]]=part["data"]
+            else :
+                raise AlgoTNError(f"C quoi ce tableau: {part}")
+        types={
+            "CARACTERE":"strshort",
+            "ENTIER": "int",
+            "BOOLEAN": "bool",
+            "REEL": "reel",
+            "CHAINE": "string",
+            "ENTIERS": "int",
+            "BOOLEANS": "bool",
+            "REELS": "reel",
+            "RÉELS": "reel",
+            "REÉLS": "reel",
+            "RÉÉLS": "reel",
+            "CHAINES": "string"
+        }
+        firstvals={
+            "int":0,
+            "bool":True,
+            "reel": 0.0,
+            "string":"",
+            "strshort":self.cc
+        }
+        # for tabtype,contenu in tdnt.items() :
+        #     x=contenu.split()
+        #     #NPO : detialed errors
+        #     if not (len(x)==4 and x[0].upper()=="TABLEAU" and x[1].upper()=="DE" and x[2].isdigit() and x[3].upper() in types  ) :
+        #         raise SyntaxError("\" TABLEAU \" ou \" DE \" ou nombre des cases ou type oubliés")
+        #     self.types[tabtype]=[x[2],x[3]]
+        # for var,type in tdog.items() :
+        #     if type.upper() in types :
+        #         self.initialvars[var]=firstvals[types[type.upper()]]
+        #     elif type.upper() in self.types :
+        #         self.create_tab(type.upper(),var)
+        for var,type in tdog.items() :
+            if type.upper() in types :
+                self.initialvars[var.upper()]=firstvals[types[type.upper()]]
+            elif type.lower() in {"procédure","procedure"} :
+                self.initialprocedures[var.upper()]="intdog"
+            elif type.lower() in {"fonction","function"} :
+                self.initialfuncs[var.upper()]="intdog"
     class ReturnSignal(Exception):
         def __init__(self, value):
             self.value = value
     def doall(self,x) :
         for i in(x) :
             self.execute(i)
+    #Continue dealing with caracs
+    def verifc(self,x) :
+        return type(x) is str and len(x) in {55,54} and x.endswith(self.cc)
     def create_tab(self,typename,tabname) :
         standardvalues = {
             "int": 0,
@@ -53,15 +114,23 @@ class Interpreter:
         return index
     def evaluate(self, node):
         kind=node[0]
-        if kind in{"number","float","string","boolean"} :
+        if kind in{"number","float","boolean"} :
             return node[1] 
+        elif kind=="string" :
+            if self.verifc(node[1]) :
+                return node[1]
+            else :
+                return node[1]
         elif kind=="variable" :
             name=node[1]
             if name in self.tabs :
                 return self.tabs[name]
             elif name not in self.variables :
                 raise AlgoTNError(f"Variable non définie : {name}")
-            return self.variables[name]
+            elif self.verifc(self.variables[name]) :
+                return self.variables[name][0]
+            else :
+                return self.variables[name]
         elif kind=="binary" :
             left=self.evaluate(node[2])
             right=self.evaluate(node[3])
@@ -177,6 +246,20 @@ class Interpreter:
                     raise AlgoTNError("La fonction CONVCH accepte exactement 1 paramètre")
                 argument = self.evaluate(node[2][0])
                 return str(argument)
+            elif name.upper()=="ORD" :
+                if len(node[2]) != 1:
+                    raise AlgoTNError("La fonction ORD accepte exactement 1 paramètre")
+                argument = self.evaluate(node[2][0])
+                if len(argument)!=1 :
+                    raise AlgoTNError(f"Pour ORD, il faut avoir un caractère")
+                return ord(argument)
+            elif name.upper()=="CHR" :
+                if len(node[2]) != 1:
+                    raise AlgoTNError("La fonction CHR accepte exactement 1 paramètre")
+                argument = self.evaluate(node[2][0])
+                if len(argument)!=1 :
+                    raise AlgoTNError("Pour CHR, if faut avoir un caractère")
+                return chr(argument)
             elif name.upper()=="VALEUR" :
                 if len(node[2]) != 1:
                     raise AlgoTNError("La fonction VALEUR accepte exactement 1 paramètre")
@@ -218,7 +301,15 @@ class Interpreter:
                 if not (type(argument) is str):
                     raise AlgoTNError("La fonction long attend un caractère ou une chaine de caractères")
                 return len(argument)
-            elif name[0:5]=="LIRE_" :
+            elif name.lower()=="ecrire_fin**special" :
+                output=""
+                x=len(node[2])
+                for i in range(x-1) :
+                    output+=str(self.evaluate(node[2][i]))
+                print(output,end=self.evaluate(node[2][x-1]))
+                #print(node[2][x-2])
+                return None
+            elif name[0:5]=="LIRE_I" :
                 if len(node[2])==0:
                     raise AlgoTNError("LIRE n'a reçue aucune variable")
                 toprint=""
@@ -273,7 +364,7 @@ class Interpreter:
                     return None
             elif name=="LIRE" :
                 if len(node[2])==0:
-                    raise AlgoTNError("LIRE n'a reçu aucune variable")
+                    raise AlgoTNError("LIRE n'a reçue aucune variable")
                 toprint=""
                 if len(node[2])>1 :
                     for i in range(1,len(node[2])) :
@@ -282,13 +373,44 @@ class Interpreter:
                 if argument[0] not in {"variable","subs"}:
                     raise AlgoTNError("La fonction LIRE attend une variable")
                 elif argument[0]=="variable" :
-                    self.variables[varname] = str(input(toprint))
-                    return None
-                elif argument[0]=="subs" :
-                    tabname = argument[1]
-                    tabpos=argument[2]
-                    pos = self.check_index(self.tabs[tabname], self.evaluate(tabpos))
-                    self.tabs[tabname][pos] = str(input(toprint))
+                    varname = argument[1]
+                    if varname in self.variables :
+                        raise AlgoTNError(f"{varname} a déja été déclarée")
+                    elif varname in self.initialvars :
+                        var=self.initialvars[varname]
+                    else :
+                        raise AlgoTNError(f"Cette variable ne figure pas dans le TDO")
+                    if self.verifc(var) :
+                        x=input(toprint)
+                        if len(x) ==1:
+                            self.variables[varname]=x+self.cc
+                        else :
+                            raise AlgoTNError("Saisie fausse")
+                    elif type(var) is int :
+                        try :
+                            self.variables[varname] = int(input(toprint))
+                        except :
+                            raise AlgoTNError("Saisie fausse")
+                    elif type(var) is bool :
+                        try :
+                            value = input(toprint).strip().upper()
+                            if value == "VRAI":
+                                self.variables[varname] = True
+                            elif value == "FAUX":
+                                self.variables[varname] = False
+                            else:
+                                raise AlgoTNError("VRAI ou FAUX attendus")
+                        except :
+                            raise AlgoTNError("Saisie fausse")
+                    elif type(var) is str :
+                        self.variables[varname] = str(input(toprint))
+                    elif type(var) is float :
+                        try :
+                            self.variables[varname] = float(input(toprint))
+                        except :
+                            raise AlgoTNError("Saisire fausse")
+                    else :
+                        raise AlgoTNError(f"Type {name[5:]} invalide à extraire")
                     return None
             elif name in self.functions :
                 params=[]
@@ -298,9 +420,6 @@ class Interpreter:
                 vars=func[2]
                 out=func[3]
                 body=func[4]
-                ts="####tdol####"
-                tdol=func[5]
-
                 types = {
                     "int": int,
                     "bool": bool,
@@ -346,20 +465,12 @@ class Interpreter:
                     raise AlgoTNError(f"La fonction {name} n'a pas une valeur de retour")
 
                 finally:
-                    if tdol!=ts :
-                        for name in tdol :
-                            if name in self.variables and not (type(self.variables[name]) is types[tdol[name]]) :
-                                raise AlgoTNError(f"Type incorrect de {name} supposé {types[tdol[name]]} reçu {type(self.variables[name])}" )
-                            if name in self.tabs and not (len(self.tabs[name]) == self.types[tdol[name]][0] and type(self.tabs[name][0]) is types[self.types[tdol[name]][1]]) :
-                                raise AlgoTNError(f"Type incorrect de {name} supposé {self.types[tdol[name]]} reçu {tdol[name]}" )
                     self.variables = old_variables
                     self.tabs=old_tabs
             elif name in self.procedures:
                 procedure = self.procedures[name]
                 vars = procedure[2]
                 body = procedure[3]
-                ts="####tdol####"
-                tdol=procedure[4]
                 types = {
                     "int": int,
                     "bool": bool,
@@ -480,7 +591,31 @@ class Interpreter:
     def _execute_node(self, node):
         kind=node[0]
         if kind=="assign" :
-            self.variables[node[1]]=self.evaluate(node[2])
+            if node[1] in self.variables :
+                if self.verifc(self.variables[node[1]]) :
+                    if type(self.evaluate(node[2])) is str and len(self.evaluate(node[2]))!=1:
+                        raise AlgoTNError("Cractère pas plus que longeur 1")
+                    else :
+                        self.variables[node[1]]=self.evaluate(node[2])+self.cc
+                elif type(self.evaluate(node[2]))!=type(self.variables[node[1]]) :
+                    raise AlgoTNError("Il est impossible de changer le type d'une vaibale dans un algorithme")
+                else :
+                    self.variables[node[1]]=self.evaluate(node[2])
+            elif node[1] in self.initialvars :
+                inival=self.initialvars[node[1]]
+                value=self.evaluate(node[2])
+                if self.verifc(inival) :
+                    if len(value)==1 :
+                        self.variables[node[1]]=value+self.cc
+                    else :
+                        raise AlgoTNError("La longeur d'un caractère ne peut pas dépasser 1")
+                elif type(value) != type(inival) :
+                    raise AlgoTNError(f"Le type de {node[1]} dans le TDO est différent que celui dans l'appel")
+                else :
+                    self.variables[node[1]]=value
+            else :
+                #print(initial.vars)
+                raise AlgoTNError(f"Cette variable n'est pas dans le TDO")
         elif kind=="nt" :
             self.types[node[1]]=[self.evaluate(node[2]),node[3]]
         elif kind=="assigntab" :
@@ -538,20 +673,29 @@ class Interpreter:
                     raise AlgoTNError("Pas égal à 0")
             else : 
                 pas=1
-            if type(a) is int and type(b) is int :
-                for SUPERSUPERSPECIALSUPERSUPERCOUNTER in range(a,b + (1 if pas > 0 else -1),pas) :
-                    self.variables[name]=SUPERSUPERSPECIALSUPERSUPERCOUNTER
-                    self.doall(node[3])
-                self.variables.pop(name)
-            elif type(a) is str and type(b) is str :
-                a=ord(a[0])
-                b=ord(b[0])
-                for SUPERSUPERSPECIALSUPERSUPERCOUNTER in range(a,b + (1 if pas > 0 else -1),pas) :
-                    self.variables[name]=chr(SUPERSUPERSPECIALSUPERSUPERCOUNTER)
-                    self.doall(node[3])
-                self.variables.pop(name)
+            if name in self.initialvars :
+                if type(a) is int and type(b) is int :
+                    if type(self.initialvars[name]) is int :
+                        for SUPERSUPERSPECIALSUPERSUPERCOUNTER in range(a,b + (1 if pas > 0 else -1),pas) :
+                            self.variables[name]=SUPERSUPERSPECIALSUPERSUPERCOUNTER
+                            self.doall(node[3])
+                        #self.variables.pop(name)
+                    else :
+                        raise AlgoTNError("Un compteur d'entiers c un entier dans le TDO")
+                elif self.verifc(a) and self.verifc(b) :
+                    if self.verifc(self.initialvars[name]) :
+                        a=ord(a[0])
+                        b=ord(b[0])
+                        for SUPERSUPERSPECIALSUPERSUPERCOUNTER in range(a,b + (1 if pas > 0 else -1),pas) :
+                            self.variables[name]=chr(SUPERSUPERSPECIALSUPERSUPERCOUNTER)
+                            self.doall(node[3])
+                        #self.variables.pop(name)
+                    else :
+                        raise AlgoTNError("Un compteur de caractères est un caractères dans le TDO")
+                else :
+                    raise AlgoTNError(f"Le début et la fin de pour ne sont ni des entiers ni des caractères ou sont de types différents")
             else :
-                AlgoTNError(f"Le début et la fin de pour ne sont ni des entiers ni des caractères ou sont de types différents")
+                raise AlgoTNError(f"Le compteur {name.lower()} n'est pas encore initialisé dans le TDOG")
         elif kind=="function" :
             self.functions[node[1]]=node
         elif kind=="procedure" :
@@ -562,6 +706,7 @@ class Interpreter:
             raise AlgoTNError(f"Phrase inconnue {kind}")
     def execute(self, node):
         try:
+            #print(get_tabs.all_tabs)
             return self._execute_node(node)
 
         except AlgoTNError as error:
@@ -578,9 +723,13 @@ class Interpreter:
     def run(self, tree):
         if tree[0] != "program":
             raise AlgoTNError("Programme atteundu")
-
+        print(self.verifc("A----------SUPERSUPERSPECIALNOWHEREITHASENDED"))
+        self.construct(get_tabs.all_tabs)
+        
         for statement in tree[1]:
             self.execute(statement)
+            #print(get_tabs.all_tabs)
+        print("x",self.initialvars)
 if __name__ == "__main__":
     try:
         with open("programme.mini.txt", encoding="utf-8") as file:

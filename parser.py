@@ -51,10 +51,23 @@ class Parser:
                         params = []
                         if self.first_token()[0] != "RPAR":
                             while True:
-                                params.append(self.logic())
-                                if self.first_token()[0] != "COMMA":
-                                    break
-                                self.removefirst("COMMA")
+                                if self.first_token()[1].upper()!="END" :
+                                    params.append(self.logic())
+                                    if self.first_token()[0] != "COMMA":
+                                        break
+                                    self.removefirst("COMMA")
+                                else :
+                                    if name.lower() in {"écrire","ecrire"} :
+                                        name="ecrire_fin**special"
+                                        self.removekeyword("end")
+                                        self.removefirst("EQ")
+                                        params.append(self.logic())
+                                        if self.first_token()[0]!="RPAR" :
+                                            raise AlgoTNError("Fin doit être le dernier paramètre")
+                                        else :
+                                            break
+                                    else :
+                                        raise AlgoTNError("Seul Êcrire peut avoir le paramètre fin")
                         self.removefirst("RPAR")
                         return ("call", name, params)
                     return ("variable", name)
@@ -221,7 +234,7 @@ class Parser:
             "tdol":"TDOL"
         }
         if current!=["KEYWORD",expected] :
-             self.error( f"Mot-clé {kre[expected]}, reçu {current}" )
+             self.error( f"Mot-clé {kre[expected.lower()]}, reçu {current}" )
         self.removefirst("KEYWORD")
     #-----------------------------nests------------------------------------------------
     def parse_if(self) :

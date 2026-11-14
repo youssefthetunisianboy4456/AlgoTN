@@ -1,4 +1,0 @@
-[
-    {"name": "TDOG", "data": {"x": "fonction"}},
-    {"name": "TDOL de x", "data": {"a": "entier"}}
-]
