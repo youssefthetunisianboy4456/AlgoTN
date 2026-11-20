@@ -58,7 +58,8 @@ def tokenize(code) :
                 "DÉBUT":"start",
                 "RÉPÉTER":"repeat",
                 "RÉPETER":"repeat",
-                "REPÉTER":"repeat"
+                "REPÉTER":"repeat",
+                "ALGORITHME":"algorithme"
             }
             logicops={
                 "ET" : "and",
@@ -111,9 +112,9 @@ def tokenize(code) :
         elif code[pos] == ":":
             token.append(["COLON", ":"])
             pos += 1
-        elif code[pos:pos+2]=="<-":
-            token.append(["APPEND","<-"])
-            pos+=2
+        elif code[pos:pos+1]=="←":
+            token.append(["APPEND","←"])
+            pos+=1
         elif code[pos]=="+" :
             token.append(["PLUS","+"])
             pos+=1
@@ -132,6 +133,12 @@ def tokenize(code) :
         elif code[pos]==")" :
             token.append(["RPAR",")"])
             pos+=1
+        elif code[pos]=="{" :
+            token.append(["LMO3","{"])
+            pos+=1
+        elif code[pos]=="}" :
+            token.append(["RMO3","}"])
+            pos+=1
         elif code[pos]=="[" :
             token.append(["LMO","["])
             pos+=1
@@ -147,15 +154,15 @@ def tokenize(code) :
         elif pos<len(code)-2 and code[pos:pos+3]=="DIV" :
                     token.append(["DIV","div"])
                     pos+=3
-        elif pos<len(code)-1 and code[pos:pos+2]==">=" :
-            token.append(["MOREQ",">="])
-            pos+=2
-        elif pos<len(code)-1 and code[pos:pos+2]=="<=" :
-            token.append(["LOREQ","<="])
-            pos+=2
-        elif pos<len(code)-1 and code[pos:pos+2]=="!=" :
-            token.append(["NEQ","!="])
-            pos+=2
+        elif pos<len(code)-1 and code[pos:pos+1]=="≥" :
+            token.append(["MOREQ","≥"])
+            pos+=1
+        elif pos<len(code)-1 and code[pos:pos+1]=="≤" :
+            token.append(["LOREQ","≤"])
+            pos+=1
+        elif pos<len(code)-1 and code[pos:pos+1]=="≠" :
+            token.append(["NEQ","≠"])
+            pos+=1
         elif code[pos]=="=" :
             token.append(["EQ","="])
             pos+=1
@@ -164,6 +171,9 @@ def tokenize(code) :
             pos+=1
         elif code[pos]==">" :
             token.append(["MORE",">"])
+            pos+=1
+        elif code[pos]=="∈" :
+            token.append(["IN","∈"])
             pos+=1
         #elif pos<len(code)-3 and code[pos:pos+4]=="Vrai" :
          #   token.append(["BOOLEAN","True"])
