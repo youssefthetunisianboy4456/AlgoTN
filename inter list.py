@@ -314,7 +314,6 @@ def execute_code():
 
     try:
         tokens = tokenize(code)
-
         parser = Parser(tokens)
         tree = parser.parse()
 
@@ -341,10 +340,10 @@ def execute_code():
             "\nERREUR : " + str(error)
         )
 
-    except Exception as error:
-        window.ConsoleOutput.appendPlainText(
-           "\nERREUR INTERNE : " + str(error)
-        )
+     #except Exception as error:
+      #  window.ConsoleOutput.appendPlainText(
+       #    "\nERREUR INTERNE : " + str(error)
+        #)
 
     finally:
         builtins.input = old_input

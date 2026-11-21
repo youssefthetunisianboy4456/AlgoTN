@@ -37,7 +37,7 @@ def tokenize(code) :
             pos+=7
         elif code[pos].isalpha(): # or code[pos] == "_":
             name = ""
-            while pos < len(code) and (code[pos] != " "):
+            while pos < len(code) and (code[pos] not in { " ","\n",")","("}):
                 name += code[pos]
                 pos += 1
             keywords = {
@@ -101,10 +101,14 @@ def tokenize(code) :
                 token.append(["KEYWORD","to"])
             else:
                 token.append(["IDENTIFIER", name.upper()])
-        elif code[pos]=="\"" :
+        elif code[pos] in {"\"","\'"} :
             s=code.find("\"",pos+1)
+            
             if s==-1 :
-                raise error("Guillemet fermant manquant", pos)
+                if code.find("\'",pos+1)==-1 :
+                    raise error("Guillemet fermant manquant", pos)
+                else :
+                    s=code.find("\'",pos+1)
             else :
                 token.append(["STRING",code[pos+1:s]])
                 pos=s+1
@@ -186,16 +190,19 @@ def tokenize(code) :
         else :
             error(f"Caractère inconnu : {code[pos]!r}", pos)
     #token.append(["EOF", None])
-    if token[0]!=["KEYWORD","algorithme"] :
-        error("La première partie de tout algorithme doit être \" Algorithme \" ",pos)
-    if token[1][0]!="IDENTIFIER" :
-        error("Le nom de l'algo n'est pas standard ",pos)
-    if token[2][0]!="NEWLINE" :
-        error("Nouvelle ligne après le nom de l'algo")
-    if token[3]!=["KEYWORD","start"] or token[-1]!=["KEYWORD","end"] :
-        error("Chaque algorithme doit commencer par \" DEBUT \" et se terminer par \" FIN \"",pos)
-    else :
-        token[-1]=["EOF",None]
+    try :
+        if token[0]!=["KEYWORD","algorithme"] :
+            error("La première partie de tout algorithme doit être \" Algorithme \" ",pos)
+        if token[1][0]!="IDENTIFIER" :
+            error("Le nom de l'algo n'est pas standard ",pos)
+        if token[2]!=["NEWLINE","\n"] :
+            error("Nouvelle ligne après le nom de l'algo",pos)
+        if token[3]!=["KEYWORD","start"] or token[-1]!=["KEYWORD","end"] :
+            error("Chaque algorithme doit commencer par \" DEBUT \" et se terminer par \" FIN \"",pos)
+        else :
+            token[-1]=["EOF",None]
+    except :
+        print(token)
     return token
 if __name__ == "__main__":
     with open("programme.mini.txt", encoding="utf-8") as file:
