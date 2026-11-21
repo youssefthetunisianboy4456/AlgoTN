@@ -2,6 +2,8 @@
  #   code = file.read()
 from errors import AlgoTNError
 def tokenize(code) :
+    def veriflegit(x) :
+        return x[0].isalpha() and x.find(" ")==-1
     def error(message, position):
         line = code.count("\n", 0, position) + 1
         raise AlgoTNError(message, line)
@@ -33,9 +35,9 @@ def tokenize(code) :
         elif code[pos:pos+7].lower() in {"jusqu'a","jusqu'à"} and (pos+7 == len(code) or not (code[pos+7].isalnum() or code[pos+7] == "_")):
             token.append(["KEYWORD", "until"])
             pos+=7
-        elif code[pos].isalpha() or code[pos] == "_":
+        elif code[pos].isalpha(): # or code[pos] == "_":
             name = ""
-            while pos < len(code) and (code[pos].isalnum() or code[pos] == "_"):
+            while pos < len(code) and (code[pos] != " "):
                 name += code[pos]
                 pos += 1
             keywords = {
