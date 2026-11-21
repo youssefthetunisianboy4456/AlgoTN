@@ -112,7 +112,7 @@ def open_file():
         with open(path, "r", encoding="utf-8") as file:
             code = file.read()
 
-        window.codeEditor.setPlainText(code)
+        window.CodeEditor.setPlainText(code)
 
         current_file = Path(path)
 
@@ -140,7 +140,7 @@ def save_file():
         current_file = Path(path)
 
     try:
-        code = window.codeEditor.toPlainText()
+        code = window.CodeEditor.toPlainText()
 
         current_file.write_text(code, encoding="utf-8")
 
