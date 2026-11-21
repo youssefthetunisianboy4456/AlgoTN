@@ -184,7 +184,13 @@ def tokenize(code) :
         else :
             error(f"Caractère inconnu : {code[pos]!r}", pos)
     #token.append(["EOF", None])
-    if token[0]!=["KEYWORD","start"] or token[-1]!=["KEYWORD","end"] :
+    if token[0]!=["KEYWORD","algorithme"] :
+        error("La première partie de tout algorithme doit être \" Algorithme \" ",pos)
+    if token[1][0]!="IDENTIFIER" :
+        error("Le nom de l'algo n'est pas standard ",pos)
+    if token[2][0]!="NEWLINE" :
+        error("Nouvelle ligne après le nom de l'algo")
+    if token[3]!=["KEYWORD","start"] or token[-1]!=["KEYWORD","end"] :
         error("Chaque algorithme doit commencer par \" DEBUT \" et se terminer par \" FIN \"",pos)
     else :
         token[-1]=["EOF",None]

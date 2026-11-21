@@ -456,6 +456,9 @@ class Parser:
                 self.error(f"Supposé fin de ligne mais a reçu {self.first_token()}")
         return statements
     def parse(self):
+        self.removekeyword("algorithme")
+        self.removefirst("IDENTIFIER")
+        self.removefirst("NEWLINE")
         self.removekeyword("start")
         self.removefirst("NEWLINE")
         statements = self.parse_block(set())
