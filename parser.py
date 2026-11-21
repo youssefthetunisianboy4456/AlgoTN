@@ -329,6 +329,7 @@ class Parser:
 
         if self.first_token() == ["KEYWORD", "pas"]:
             self.removekeyword("pas")
+            self.removefirst("EQ")
             params.append(self.expression())
 
         self.removekeyword("procede")
