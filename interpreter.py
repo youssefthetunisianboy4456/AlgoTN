@@ -423,12 +423,13 @@ class Interpreter:
                     raise AlgoTNError("La fonction LIRE attend une variable")
                 elif argument[0] == "variable":
                     varname = argument[1]
-                    if varname in self.variables:
-                        raise AlgoTNError(f"{varname} a déja été déclarée")
-                    elif varname in self.initialvars:
-                        var = self.initialvars[varname]
-                    else:
-                        raise AlgoTNError(f"Cette variable ne figure pas dans le TDO")
+                    if varname not in self.variables:
+                        if varname in self.initialvars:
+                            var = self.initialvars[varname]
+                        else:
+                            raise AlgoTNError(f"Cette variable ne figure pas dans le TDO")
+                    else :
+                        var=self.variables[varname]
                     if self.verifc(var):
                         x = input(toprint)
                         if len(x) == 1:
