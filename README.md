@@ -39,7 +39,7 @@ Dans la fenêtre de démarrage, sélectionnez **2ᵉ année**, puis cliquez sur 
 
 ## Écrire un algorithme
 
-- **Majuscules et minuscules.** Les mots-clés et les noms de variables ou de fonctions sont insensibles à la casse. Par exemple, `DEBUT`, `debut` et `Debut` sont équivalents. Le texte entre guillemets conserve sa casse.
+- **Majuscules et minuscules.** Les mots-clés et les noms de variables ou de fonctions sont insensibles à la case. Par exemple, `DEBUT`, `debut` et `Debut` sont équivalents. Le texte entre guillemets conserve sa casse.
 - **Indentation.** Comme dans les algorithmes écrits en classe, les retraits sont facultatifs. Les mots-clés délimitent les blocs. Vous pouvez indenter les instructions pour rendre le code plus lisible.
 - **Symboles.** Le menu **Insérer** donne accès aux symboles utilisés en classe, comme `←`, `≠`, `≥` et `≤`. Pour indiquer le pas d’une boucle `POUR`, écrivez par exemple `PAS 2`.
 
