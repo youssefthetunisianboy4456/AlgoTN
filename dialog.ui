@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StartupDialog</class>
+ <widget class="QDialog" name="StartupDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>350</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>450</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>AlgoTN Studio - Choix du niveau</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../../Downloads/Icône de code turquoise sur fond bleu nuit.webp</normaloff>../../../../Downloads/Icône de code turquoise sur fond bleu nuit.webp</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog {
+    background-color: #0c121d;
+}</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>-10</y>
+     <width>416</width>
+     <height>343</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>15</number>
+    </property>
+    <property name="leftMargin">
+     <number>30</number>
+    </property>
+    <property name="topMargin">
+     <number>30</number>
+    </property>
+    <property name="rightMargin">
+     <number>30</number>
+    </property>
+    <property name="bottomMargin">
+     <number>30</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="StartupTitle">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>60</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    color: #68e1c6;
+    font-size: 20px;
+    font-weight: bold;
+}</string>
+      </property>
+      <property name="text">
+       <string>BIENVENUE DANS ALGOTN STUDIO</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check2eme">
+      <property name="styleSheet">
+       <string notr="true">QCheckBox {
+    color: #e6edf3;
+    font-size: 15px;
+    spacing: 12px;
+    padding: 12px;
+}
+QCheckBox::indicator {
+    width: 20px;
+    height: 20px;
+}</string>
+      </property>
+      <property name="text">
+       <string>2e année secondaire</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="check3eme4eme">
+      <property name="styleSheet">
+       <string notr="true">QCheckBox {
+    color: #e6edf3;
+    font-size: 15px;
+    spacing: 12px;
+    padding: 12px;
+}
+QCheckBox::indicator {
+    width: 20px;
+    height: 20px;
+}</string>
+      </property>
+      <property name="text">
+       <string>3e ou 4e année secondaire</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="StartupMessage">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel {
+    color: #68e1c6;
+    font-size: 13px;
+    padding: 5px;
+}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnContinue">
+      <property name="minimumSize">
+       <size>
+        <width>160</width>
+        <height>45</height>
+       </size>
+      </property>
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton {
+    background-color: #68e1c6;
+    color: #0c121d;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    padding: 10px;
+}
+QPushButton:hover {
+    background-color: #83f0d5;
+}
+QPushButton:pressed {
+    background-color: #45b99f;
+}</string>
+      </property>
+      <property name="text">
+       <string>Continuer</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

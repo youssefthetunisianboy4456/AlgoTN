@@ -51,7 +51,7 @@ class Parser:
                         params = []
                         if self.first_token()[0] != "RPAR":
                             while True:
-                                if (self.first_token())!=["KEYWORD","end"] :
+                                if self.first_token()!=["KEYWORD","end"] :
                                     params.append(self.logic())
                                     if self.first_token()[0] != "COMMA":
                                         break
@@ -69,6 +69,19 @@ class Parser:
                                     else :
                                         raise AlgoTNError("Seul Êcrire peut avoir le paramètre fin")
                         self.removefirst("RPAR")
+                        if self.first_token()[0]=="COMMA" :
+                            self.removefirst("COMMA")
+                            if name.lower() not in {"écrire","ecrire"} or self.first_token()[0]!="IDENTIFIER" or self.first_token()[1].lower() not in {"lire"}:
+                                raise AlgoTNError("Seuls écrire et lire peuvent être séparés par ,")
+                            name="LIRE"
+                            self.removefirst("IDENTIFIER")
+                            self.removefirst("LPAR")
+                            extracted=self.logic()
+                            self.removefirst("RPAR")
+                            params2=[extracted]
+                            for i in params :
+                                params2.append(i)
+                            params=params2
                         return ("call", name, params)
                     return ("variable", name)
                 else :
@@ -155,6 +168,17 @@ class Parser:
                 node=("triplecompare", node,left,middle,self.removefirst(self.first_token()[0])[1],self.expression())
             else :
                 node=("compare", left,node,middle)
+        elif self.first_token()[0]=="IN":
+            self.removefirst("IN")
+            self.removefirst("LMO3")
+            params = []
+            while True:
+                    params.append(self.logic())
+                    if self.first_token()[0] != "COMMA":
+                        break
+                    self.removefirst("COMMA")
+            self.removefirst("RMO3")
+            node=("in",node,params)
         return node
     #--------------------logic------------------------------------------------------------
     def logic(self):
@@ -432,6 +456,8 @@ class Parser:
                 self.error(f"Supposé fin de ligne mais a reçu {self.first_token()}")
         return statements
     def parse(self):
+        self.removekeyword("start")
+        self.removefirst("NEWLINE")
         statements = self.parse_block(set())
 
         self.removefirst("EOF")
