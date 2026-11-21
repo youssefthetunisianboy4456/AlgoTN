@@ -37,7 +37,7 @@ def tokenize(code) :
             pos+=7
         elif code[pos].isalpha(): # or code[pos] == "_":
             name = ""
-            while pos < len(code) and (code[pos] not in { " ","\n",")","("}):
+            while pos < len(code) and (code[pos].isalnum() or code[pos] in {"_"}):
                 name += code[pos]
                 pos += 1
             keywords = {
@@ -164,7 +164,7 @@ def tokenize(code) :
             token.append(["MOREQ",">="])
             pos+=1
         elif pos<len(code)-1 and code[pos:pos+1]=="≤" :
-            token.append(["LOREQ",">="])
+            token.append(["LOREQ","<="])
             pos+=1
         elif pos<len(code)-1 and code[pos:pos+1]=="≠" :
             token.append(["NEQ","!="])

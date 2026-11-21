@@ -169,9 +169,9 @@ class Interpreter:
             left = self.evaluate(node[2])
             right = self.evaluate(node[3])
             operator = node[1]
-            if operator == "≤":
+            if operator == "<=":
                 return left <= right
-            elif operator == "≥":
+            elif operator == ">=":
                 return left >= right
             elif operator == "<":
                 return left < right
@@ -179,7 +179,7 @@ class Interpreter:
                 return left > right
             elif operator == "=":
                 return left == right
-            elif operator == "≠":
+            elif operator == "!=":
                 return left != right
             else:
                 raise AlgoTNError(f"Opérateur {operator} inconnu")
